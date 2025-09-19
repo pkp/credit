@@ -163,7 +163,8 @@ class CreditPlugin extends GenericPlugin
 
         switch ($template) {
             case 'frontend/pages/article.tpl':
-                $templateMgr->registerFilter('output', [$this, 'articleDisplayFilter']);
+            case 'frontend/pages/preprint.tpl':
+                $templateMgr->registerFilter('output', [$this, 'submissionDisplayFilter']);
                 break;
         }
         return false;
@@ -177,20 +178,29 @@ class CreditPlugin extends GenericPlugin
      *
      * @return string
      */
-    public function articleDisplayFilter($output, $templateMgr)
+    public function submissionDisplayFilter($output, $templateMgr)
     {
+        // Ensure that CRediT processing doesn't happen multiple times
+        $creditSlug = '<!-- CREDIT PROCESSED -->';
+        if (strpos($output, $creditSlug) !== false) return $output;
+
         $authorIndex = 0;
         $publication = $templateMgr->getTemplateVars('publication');
         $creditRoles = $this->getCreditRoles(Locale::getLocale());
         $authors = array_values(iterator_to_array($publication->getData('authors')));
+
         // Identify the ul.authors list and traverse li/ul/ol elements from there.
         // For any </li> elements in 1st-level depth, append CRediT information before </li>.
-        $startMarkup = '<ul class="authors">';
+        $startMarkup = match(Application::getName()) {
+            'ojs2' => '<ul class="authors">',
+            'ops' => '<ul class="versions authors">',
+        };
         $startOffset = strpos($output, $startMarkup);
         if ($startOffset === false) return $output;
+
         $startOffset += strlen($startMarkup);
         $depth = 1; // Depth of potentially nested ul/ol list elements
-        return substr($output, 0, $startOffset) . preg_replace_callback(
+        return substr($output, 0, $startOffset) . $creditSlug . preg_replace_callback(
             '/(<\/li>)|(<[uo]l[^>]*>)|(<\/[uo]l>)/i',
             function($matches) use (&$depth, &$authorIndex, $authors, $creditRoles) {
                 switch (true) {
