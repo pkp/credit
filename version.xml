@@ -4,8 +4,8 @@
 <!--
   * plugins/generic/credit/version.xml
   *
-  * Copyright (c) 2022 Simon Fraser University
-  * Copyright (c) 2022 John Willinsky
+  * Copyright (c) 2022-2025 Simon Fraser University
+  * Copyright (c) 2022-2025 John Willinsky
   * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
   *
   * Plugin version information.
@@ -13,8 +13,8 @@
 <version>
 	<application>credit</application>
 	<type>plugins.generic</type>
-	<release>1.1.0.0</release>
-	<date>2024-04-09</date>
+	<release>1.1.0.1</release>
+	<date>2025-09-19</date>
 	<lazy-load>1</lazy-load>
 	<class>CreditPlugin</class>
 </version>
