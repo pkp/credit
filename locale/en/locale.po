@@ -28,3 +28,9 @@ msgstr "The CRediT vocabulary can interact with OJS in various ways. Use this fo
 
 msgid "plugins.generic.credit.showCreditRoles"
 msgstr "Show CRediT roles by author names on article landing pages."
+
+msgid "plugins.generic.credit.requireCreditRoles"
+msgstr "Require at least one CRediT role for each contributor."
+
+msgid "plugins.generic.credit.validation.required"
+msgstr "At least one CRediT role is required for each contributor."

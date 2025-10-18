@@ -1,8 +1,8 @@
 {**
  * templates/settingsForm.tpl
  *
- * Copyright (c) 2022 Simon Fraser University
- * Copyright (c) 2022 John Willinsky
+ * Copyright (c) 2025 Simon Fraser University
+ * Copyright (c) 2025 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * Datacite plugin settings
@@ -21,6 +21,7 @@
 		<p class="pkp_help">{translate key="plugins.generic.credit.settings.description"}</p>
 		{fbvFormSection list="true"}
 			{fbvElement type="checkbox" id="showCreditRoles" label="plugins.generic.credit.showCreditRoles" checked=$showCreditRoles|compare:true}
+			{fbvElement type="checkbox" id="requireCreditRoles" label="plugins.generic.credit.requireCreditRoles" checked=$requireCreditRoles|compare:true}
 		{/fbvFormSection}
 	{/fbvFormArea}
 	{fbvFormButtons submitText="common.save"}

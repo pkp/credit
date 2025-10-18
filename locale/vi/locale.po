@@ -1,0 +1,36 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2019-11-19T11:05:26+00:00\n"
+"PO-Revision-Date: 2019-11-19T11:05:26+00:00\n"
+"Language: vi\n"
+
+msgid "plugins.generic.credit.name"
+msgstr "Plugin CRediT"
+
+msgid "plugins.generic.credit.description"
+msgstr "Plugin này thêm hỗ trợ cho bộ từ vựng đóng góp NISO CRediT."
+
+msgid "plugins.generic.credit.contributorRoles"
+msgstr "Vai trò CRediT"
+
+msgid "plugins.generic.credit.contributorRoles.description"
+msgstr "Vui lòng chọn vai trò của người đóng góp theo <a href=\"https://credit.niso.org/\" target="_new">danh sách NISO CRediT</a>."
+
+msgid "plugins.generic.credit.settings.description"
+msgstr "Từ vựng CRediT có thể tương tác với OJS theo nhiều cách khác nhau. Sử dụng biểu mẫu này để chọn tích hợp nào sẽ được sử dụng."
+
+msgid "plugins.generic.credit.showCreditRoles"
+msgstr "Hiển thị vai trò CRediT bên cạnh tên tác giả trên trang bài viết."
+
+msgid "plugins.generic.credit.requireCreditRoles"
+msgstr "Yêu cầu ít nhất một vai trò CRediT cho mỗi người đóng góp."
+
+msgid "plugins.generic.credit.validation.required"
+msgstr "Yêu cầu ít nhất một vai trò CRediT cho mỗi người đóng góp."

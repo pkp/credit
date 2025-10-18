@@ -3,8 +3,8 @@
 /**
  * @file classes/form/CreditSettingsForm.php
  *
- * Copyright (c) 2014-2022 Simon Fraser University
- * Copyright (c) 2003-2022 John Willinsky
+ * Copyright (c) 2014-2025 Simon Fraser University
+ * Copyright (c) 2003-2025 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class CreditSettingsForm
@@ -80,7 +80,7 @@ class CreditSettingsForm extends Form
     {
         $contextId = $this->_getContextId();
         $plugin = $this->_getPlugin();
-        foreach (['showCreditRoles'] as $fieldName) {
+        foreach (['showCreditRoles', 'requireCreditRoles'] as $fieldName) {
             $this->setData($fieldName, $plugin->getSetting($contextId, $fieldName));
         }
     }
@@ -90,7 +90,7 @@ class CreditSettingsForm extends Form
      */
     public function readInputData()
     {
-        $this->readUserVars(['showCreditRoles']);
+        $this->readUserVars(['showCreditRoles', 'requireCreditRoles']);
     }
 
     /**
@@ -101,7 +101,7 @@ class CreditSettingsForm extends Form
         $plugin = $this->_getPlugin();
         $contextId = $this->_getContextId();
         parent::execute(...$functionArgs);
-        foreach (['showCreditRoles'] as $fieldName) {
+        foreach (['showCreditRoles', 'requireCreditRoles'] as $fieldName) {
             $plugin->updateSetting($contextId, $fieldName, $this->getData($fieldName));
         }
     }
