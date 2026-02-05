@@ -250,7 +250,7 @@ class CreditPlugin extends GenericPlugin
 
     /**
      * Get the credit roles in an associative URI => Term array.
-     * @param $locale The locale for which to fetch the data (en_US if not available)
+     * @param $locale The locale for which to fetch the data (en if not available)
      */
     public function getCreditRoles($locale): array {
         $doc = new DOMDocument();
