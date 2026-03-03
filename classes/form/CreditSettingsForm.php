@@ -3,20 +3,18 @@
 /**
  * @file classes/form/CreditSettingsForm.php
  *
- * Copyright (c) 2014-2022 Simon Fraser University
- * Copyright (c) 2003-2022 John Willinsky
+ * Copyright (c) 2014-2026 Simon Fraser University
+ * Copyright (c) 2003-2026 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class CreditSettingsForm
- * @brief Form for journal managers to setup the CRediT plugin.
+ * @brief Form for journal managers to set up the CRediT plugin.
  */
 
 namespace APP\plugins\generic\credit\classes\form;
 
+use APP\plugins\generic\credit\CreditPlugin;
 use PKP\form\Form;
-use PKP\form\validation\FormValidator;
-use PKP\linkAction\LinkAction;
-use PKP\linkAction\request\AjaxModal;
 
 class CreditSettingsForm extends Form
 {
@@ -28,21 +26,19 @@ class CreditSettingsForm extends Form
 
     /**
      * Get the context ID.
-     *
-     * @return int
      */
-    public function _getContextId()
+    public function _getContextId(): int
     {
         return $this->_contextId;
     }
 
-    /** @var DataciteExportPlugin */
+    /** @var CreditPlugin */
     public $_plugin;
 
     /**
      * Get the plugin.
      *
-     * @return DataciteExportPlugin
+     * @return CreditPlugin
      */
     public function _getPlugin()
     {
@@ -55,7 +51,7 @@ class CreditSettingsForm extends Form
     /**
      * Constructor
      *
-     * @param DataciteExportPlugin $plugin
+     * @param CreditPlugin $plugin
      * @param int $contextId
      */
     public function __construct($plugin, $contextId)
