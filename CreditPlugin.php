@@ -286,10 +286,8 @@ class CreditPlugin extends GenericPlugin
             'cs' => 'cz',
             'da' => 'dk',
             'el' => 'gr',
-            'nb' => 'nob',
             'nb_NO' => 'nob',
             'nn' => 'nno',
-            'no' => 'nob',
         ];
 
         static $filenames;
@@ -304,8 +302,8 @@ class CreditPlugin extends GenericPlugin
                 ->first(fn (string $filename) =>
                     // 1. Look for an exact match.
                     ($filename === "{$prefix}{$locale}{$suffix}") ||
-                    // 2. Look in the preference list for a preferred fallback.
-                    (isset($localeMapping[$locale]) && $filename === "{$prefix}{$localeMapping[$locale]}{$suffix}") ||
+                    // 2. Look in the mapping list for a fallback.
+                    (isset($localeMapping[$locale]) && str_starts_with($filename, "{$prefix}{$localeMapping[$locale]}_")) ||
                     // 3. Find the first match by language.
                     (str_starts_with($filename, "{$prefix}{$language}_")));
         }
