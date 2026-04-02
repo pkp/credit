@@ -3,8 +3,8 @@
 /**
  * @file CreditPlugin.php
  *
- * Copyright (c) 2022 Simon Fraser University
- * Copyright (c) 2022 John Willinsky
+ * Copyright (c) 2022-2026 Simon Fraser University
+ * Copyright (c) 2022-2026 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
  *
  * @class CreditPlugin
@@ -13,23 +13,22 @@
 
 namespace APP\plugins\generic\credit;
 
-use \DOMDocument;
-
+use APP\author\Author;
 use APP\core\Application;
-use PKP\config\Config;
+use APP\plugins\generic\credit\classes\form\CreditSettingsForm;
+use APP\template\TemplateManager;
+use Exception;
+use PKP\author\maps\Schema;
+use PKP\components\forms\FormComponent;
 use PKP\components\forms\publication\ContributorForm;
-use PKP\core\Registry;
+use PKP\core\Core;
+use PKP\core\JSONMessage;
 use PKP\facades\Locale;
 use PKP\linkAction\LinkAction;
 use PKP\linkAction\request\AjaxModal;
-use PKP\core\JSONMessage;
+use PKP\oai\OAIRecord;
 use PKP\plugins\GenericPlugin;
 use PKP\plugins\Hook;
-use PKP\author\maps\Schema;
-use APP\author\Author;
-use PKP\oai\OAIRecord;
-
-use APP\plugins\generic\credit\classes\form\CreditSettingsForm;
 
 class CreditPlugin extends GenericPlugin
 {
@@ -44,7 +43,7 @@ class CreditPlugin extends GenericPlugin
             $contextId = ($mainContextId === null) ? $this->getCurrentContextId() : $mainContextId;
             if ($this->getEnabled($mainContextId)) {
                 // Extend the contributor map to include CRediT roles.
-                app('maps')->extend(Schema::class, function($output, Author $item, Schema $map) {
+                app('maps')->extend(Schema::class, function ($output, Author $item, Schema $map) {
                     // Ensure that an empty list is passed from the API as [] rather than null.
                     $output['creditRoles'] = $output['creditRoles'] ?? [];
                     return $output;
@@ -62,7 +61,6 @@ class CreditPlugin extends GenericPlugin
                                 "type": "string"
                         }
                     }');
-
                 });
                 if ($this->getSetting($contextId, 'showCreditRoles')) {
                     Hook::add('TemplateManager::display', [$this, 'handleTemplateDisplay']);
@@ -77,7 +75,7 @@ class CreditPlugin extends GenericPlugin
     /**
      * @copydoc Plugin::getDisplayName()
      */
-    public function getDisplayName()
+    public function getDisplayName(): string
     {
         return __('plugins.generic.credit.name');
     }
@@ -85,7 +83,7 @@ class CreditPlugin extends GenericPlugin
     /**
      * @copydoc Plugin::getDescription()
      */
-    public function getDescription()
+    public function getDescription(): string
     {
         return __('plugins.generic.credit.description');
     }
@@ -138,7 +136,7 @@ class CreditPlugin extends GenericPlugin
     }
 
     /**
-     * Hook callback: register output filter for article display.
+     * Hook callback: register the output filter for article display.
      *
      * @param string $hookName
      * @param array $args
@@ -165,36 +163,49 @@ class CreditPlugin extends GenericPlugin
 
         switch ($template) {
             case 'frontend/pages/article.tpl':
-                $templateMgr->registerFilter('output', [$this, 'articleDisplayFilter']);
+            case 'frontend/pages/preprint.tpl':
+                $templateMgr->registerFilter('output', [$this, 'submissionDisplayFilter']);
                 break;
         }
         return false;
     }
 
     /**
-     * Output filter adds CRediT information to article view.
+     * Output filter adds CRediT information to the article view.
      *
      * @param string $output
      * @param TemplateManager $templateMgr
      *
      * @return string
      */
-    public function articleDisplayFilter($output, $templateMgr)
+    public function submissionDisplayFilter($output, $templateMgr)
     {
+        // Ensure that CRediT processing doesn't happen multiple times
+        $creditSlug = '<!-- CREDIT PROCESSED -->';
+        if (str_contains($output, $creditSlug)) {
+            return $output;
+        }
+
         $authorIndex = 0;
         $publication = $templateMgr->getTemplateVars('publication');
         $creditRoles = $this->getCreditRoles(Locale::getLocale());
         $authors = array_values(iterator_to_array($publication->getData('authors')));
+
         // Identify the ul.authors list and traverse li/ul/ol elements from there.
         // For any </li> elements in 1st-level depth, append CRediT information before </li>.
-        $startMarkup = '<ul class="authors">';
+        $startMarkup = match (Application::getName()) {
+            'ojs2' => '<ul class="authors">',
+            'ops' => '<ul class="versions authors">',
+        };
         $startOffset = strpos($output, $startMarkup);
-        if ($startOffset === false) return $output;
+        if ($startOffset === false) {
+            return $output;
+        }
         $startOffset += strlen($startMarkup);
         $depth = 1; // Depth of potentially nested ul/ol list elements
-        return substr($output, 0, $startOffset) . preg_replace_callback(
+        return substr($output, 0, $startOffset) . $creditSlug . preg_replace_callback(
             '/(<\/li>)|(<[uo]l[^>]*>)|(<\/[uo]l>)/i',
-            function($matches) use (&$depth, &$authorIndex, $authors, $creditRoles) {
+            function ($matches) use (&$depth, &$authorIndex, $authors, $creditRoles) {
                 switch (true) {
                     case $depth == 1 && $matches[1] !== '': // </li> in first level depth
                         $newOutput = '<ul class="userGroup">';
@@ -204,8 +215,12 @@ class CreditPlugin extends GenericPlugin
                         }
                         $newOutput .= '</ul>';
                         return $newOutput . $matches[0];
-                    case !empty($matches[2]) && $depth >= 1: $depth++; break; // <ul>; do not re-enter once we leave
-                    case !empty($matches[3]): $depth--; break; // </ul>
+                    case !empty($matches[2]) && $depth >= 1:
+                        $depth++;
+                        break; // <ul>; do not re-enter once we leave
+                    case !empty($matches[3]):
+                        $depth--;
+                        break; // </ul>
                 }
                 return $matches[0];
             },
@@ -221,8 +236,9 @@ class CreditPlugin extends GenericPlugin
      */
     public function addCreditRoles($hookName, $form)
     {
-
-        if (!$form instanceof ContributorForm) return Hook::CONTINUE;
+        if (!$form instanceof ContributorForm) {
+            return Hook::CONTINUE;
+        }
 
         $context = Application::get()->getRequest()->getContext();
         if (!$context) {
@@ -250,14 +266,21 @@ class CreditPlugin extends GenericPlugin
 
     /**
      * Get the credit roles in an associative URI => Term array.
-     * @param $locale The locale for which to fetch the data (en if not available)
+     * @param string $locale The locale for which to fetch the data (en if not available)
+     * @throws Exception
      */
-    public function getCreditRoles($locale): array {
-        $doc = new DOMDocument();
-        if (!Locale::isLocaleValid($locale)) $locale = 'en';
-        foreach ([$locale, 'en'] as $locale) {
-            $path = dirname(__FILE__) . "/credit-translation/translations/{$locale}.json";
-            if (!file_exists($path)) continue;
+    public function getCreditRoles(string $locale): array
+    {
+        if (!Locale::isLocaleValid($locale)) {
+            $locale = 'en';
+        }
+
+        $candidateLocales = array_unique([$locale, 'en']);
+        foreach ($candidateLocales as $locale) {
+            $path = $this->getFileName($locale);
+            if (!$path || !file_exists($path)) {
+                continue;
+            }
 
             $json = json_decode(file_get_contents($path), true);
             return $json['translations'];
@@ -266,20 +289,59 @@ class CreditPlugin extends GenericPlugin
     }
 
     /**
+     * Get file name of the localized terms
+     */
+    protected function getFileName(string $locale)
+    {
+        $localeMapping = [
+            'cs' => 'cz',
+            'da' => 'dk',
+            'el' => 'gr',
+            'nb_NO' => 'nob',
+            'nn' => 'nno',
+        ];
+
+        static $filenames;
+        $prefix = Core::getBaseDir() . '/' . $this->getPluginPath() . '/credit-translation/translations/';
+        $suffix = '.json';
+        $filenames ??= collect(glob("{$prefix}*{$suffix}") ?: []);
+        // Determine the language we're looking for from $locale
+        $language = \Locale::getPrimaryLanguage($locale);
+        // Get a list of available options from the filesystem and return the file name
+        if ($filenames->isNotEmpty()) {
+            return $filenames
+                ->first(fn (string $filename) =>
+                    // 1. Look for an exact match.
+                    ($filename === "{$prefix}{$locale}{$suffix}") ||
+                    // 2. Look in the mapping list for a fallback.
+                    (isset($localeMapping[$locale]) && str_starts_with($filename, "{$prefix}{$localeMapping[$locale]}_")) ||
+                    // 3. Find the first match by language.
+                    (str_starts_with($filename, "{$prefix}{$language}_")));
+        }
+
+        return null;
+    }
+
+    /**
      * Add the CRediT role information to the JATS contributor list
      */
-    public function augmentJats($hookName, OAIRecord $record, \DOMDocument $doc) {
+    public function augmentJats($hookName, OAIRecord $record, \DOMDocument $doc)
+    {
         $submission = $record->getData('article');
         $publication = $submission->getCurrentPublication();
         $roleVocabulary = $this->getCreditRoles($submission->getData('locale'));
         $xpath = new \DOMXPath($doc);
-	$authorsArray = array_values($publication->getData('authors')->toArray());
+        $authorsArray = array_values($publication->getData('authors')->toArray());
         foreach ($xpath->query('//article/front/article-meta/contrib-group/contrib') as $matchIndex => $contribNode) {
             $match = $xpath->query('//email', $contribNode);
-            if (!$match->length) continue;
-	    $author = $authorsArray[$matchIndex];
+            if (!$match->length) {
+                continue;
+            }
+            $author = $authorsArray[$matchIndex];
             $creditRoles = $author->getData('creditRoles');
-            if (!$creditRoles) continue;
+            if (!$creditRoles) {
+                continue;
+            }
 
             foreach ($creditRoles as $role) {
                 $roleNode = $contribNode->insertBefore($doc->createElement('role'), $contribNode->firstChild);
