@@ -1,9 +1,9 @@
 # CRediT plugin for OJS
 
-This plugin adds support for the NISO CRediT contributor role standard in OJS.
-It is a work in progress, started at the 2022 Helsinki sprint.
+This plugin adds support for the NISO CRediT contributor role standard in OJS 3.3, 3.4, and 3.5.
+It was started at the 2022 Helsinki sprint.
 
-**This plugin is not complete. Do not attempt to use it if you're not sure!**
+As of OJS 3.6 and later, CRediT contributor roles have been integrated into the core.
 
 Working group:
 
