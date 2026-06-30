@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-02-25 16:06+0000\n"
-"Last-Translator: Aysa Ekanger <aysa.ekanger@uit.no>\n"
+"PO-Revision-Date: 2026-04-21 14:09+0000\n"
+"Last-Translator: Eirik Hanssen <eirikh@oslomet.no>\n"
 "Language-Team: Norwegian Bokmål <http://translate.pkp.sfu.ca/projects/"
 "plugins/credit/nb_NO/>\n"
 "Language: nb_NO\n"
@@ -14,17 +14,23 @@ msgstr ""
 msgid "plugins.generic.credit.name"
 msgstr "CRediT Plugin"
 
-#, fuzzy
 msgid "plugins.generic.credit.description"
 msgstr ""
-"Dette programtillegget  tilføyer støtte for NISO CRediT-vokabularet for "
-"bidragsyterroller."
+"Dette programtillegget gir støtte for NISO CRediT-vokabularet for "
+"bidragsytere."
 
 msgid "plugins.generic.credit.contributorRoles"
 msgstr "CRediT-roller"
 
-#, fuzzy
 msgid "plugins.generic.credit.contributorRoles.description"
 msgstr ""
-"Vær vennlig og velg bidragsyterens roller i henhold til <a href=\"https"
-"://credit.niso.org/\" target=\"_new\">NISO CRediT-listen</a>."
+"Vennligst velg bidragsyterens roller i henhold til <a href=\"https://credit."
+"niso.org/\" target=\"_new\">NISO CRediT-listen</a>."
+
+msgid "plugins.generic.credit.settings.description"
+msgstr ""
+"CRediT-vokabularet kan samhandle med OJS på ulike måter. Bruk dette skjemaet "
+"for hvilke integrasjoner som skal brukes."
+
+msgid "plugins.generic.credit.showCreditRoles"
+msgstr "Vis CRediT-roller ved forfatternavn på artikkelens landingsside."
